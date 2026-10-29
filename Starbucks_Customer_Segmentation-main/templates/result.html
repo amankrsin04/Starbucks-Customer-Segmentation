@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Offer Recommendation</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+</head>
+
+
+<body>
+
+<div class="page">
+
+    <!-- NAVBAR -->
+
+    <nav class="navbar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                ☕
+            </div>
+
+            <div>
+
+                <div class="brand-name">
+                    STARBUCKS
+                </div>
+
+                <div class="brand-subtitle">
+                    CUSTOMER ANALYTICS
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <a href="/" class="nav-button">
+            ← New Analysis
+        </a>
+
+    </nav>
+
+
+    <!-- RESULT HERO -->
+
+    <section class="result-hero">
+
+        <div>
+
+            <div class="badge">
+                ANALYSIS COMPLETE
+            </div>
+
+            <h1>
+                Customer Recommendation
+            </h1>
+
+            <p>
+                The customer's behavior has been analyzed
+                successfully.
+            </p>
+
+        </div>
+
+        <div class="success-icon">
+            ✓
+        </div>
+
+    </section>
+
+
+    <!-- RECOMMENDATION -->
+
+    <section class="recommendation">
+
+        <div class="recommendation-left">
+
+            <span class="small-label">
+                RECOMMENDED OFFER
+            </span>
+
+            <h2>
+                {{ offer.offer_type|upper }}
+            </h2>
+
+            <div class="offer-reward">
+
+                Reward
+
+                <strong>
+                    {{ offer.reward }}
+                </strong>
+
+            </div>
+
+            <p>
+                {{ reason }}
+            </p>
+
+        </div>
+
+
+        <div class="recommendation-right">
+
+            <div class="recommendation-label">
+                CUSTOMER SEGMENT
+            </div>
+
+            <div class="cluster-number">
+                CLUSTER {{ cluster }}
+            </div>
+
+            <h3>
+                {{ segment }}
+            </h3>
+
+        </div>
+
+    </section>
+
+
+    <!-- OFFER DETAILS -->
+
+    <section class="section">
+
+        <div class="section-title">
+
+            <div>
+
+                <span class="small-label">
+                    OFFER DETAILS
+                </span>
+
+                <h2>
+                    Recommended Promotion
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="offer-grid">
+
+            <div class="detail-card">
+
+                <span>OFFER TYPE</span>
+
+                <strong>
+                    {{ offer.offer_type|capitalize }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <span>REWARD</span>
+
+                <strong>
+                    {{ offer.reward }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <span>DIFFICULTY</span>
+
+                <strong>
+                    {{ offer.difficulty }}
+                </strong>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <span>DURATION</span>
+
+                <strong>
+                    {{ offer.duration }} days
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="offer-channel">
+
+            <span>
+                AVAILABLE CHANNELS
+            </span>
+
+            <strong>
+                {{ offer.channels }}
+            </strong>
+
+        </div>
+
+        <div class="offer-id">
+            Offer ID: {{ offer.id }}
+        </div>
+
+    </section>
+
+
+    <!-- CUSTOMER INFORMATION -->
+
+    <section class="section">
+
+        <div class="section-title">
+
+            <div>
+
+                <span class="small-label">
+                    CUSTOMER PROFILE
+                </span>
+
+                <h2>
+                    Customer Information
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+
+                <span>AGE</span>
+
+                <strong>
+                    {{ age }}
+                </strong>
+
+                <small>
+                    years
+                </small>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span>ANNUAL INCOME</span>
+
+                <strong>
+                    ₹{{ income }}
+                </strong>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span>TRANSACTIONS</span>
+
+                <strong>
+                    {{ transactions }}
+                </strong>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span>MONEY SPENT</span>
+
+                <strong>
+                    ₹{{ money_spent }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- BEHAVIOR -->
+
+    <section class="section">
+
+        <div class="section-title">
+
+            <div>
+
+                <span class="small-label">
+                    CUSTOMER BEHAVIOR
+                </span>
+
+                <h2>
+                    Engagement Overview
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="behavior-grid">
+
+
+            <div class="behavior-card">
+
+                <div class="behavior-top">
+
+                    <span>Offers Received</span>
+
+                    <strong>
+                        {{ received }}
+                    </strong>
+
+                </div>
+
+                <div class="progress">
+
+                    <div
+                        style="width: {{ [received * 10, 100] | min }}%;">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="behavior-card">
+
+                <div class="behavior-top">
+
+                    <span>Offers Viewed</span>
+
+                    <strong>
+                        {{ viewed }}
+                    </strong>
+
+                </div>
+
+                <div class="progress">
+
+                    <div
+                        style="width: {{ [viewed * 10, 100] | min }}%;">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="behavior-card">
+
+                <div class="behavior-top">
+
+                    <span>Offers Completed</span>
+
+                    <strong>
+                        {{ completed }}
+                    </strong>
+
+                </div>
+
+                <div class="progress">
+
+                    <div
+                        style="width: {{ [completed * 10, 100] | min }}%;">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="behavior-card">
+
+                <div class="behavior-top">
+
+                    <span>View Rate</span>
+
+                    <strong>
+                        {{ view_rate }}%
+                    </strong>
+
+                </div>
+
+                <div class="progress">
+
+                    <div
+                        style="width: {{ view_rate }}%;">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="behavior-card">
+
+                <div class="behavior-top">
+
+                    <span>Completion Rate</span>
+
+                    <strong>
+                        {{ completion_rate }}%
+                    </strong>
+
+                </div>
+
+                <div class="progress">
+
+                    <div
+                        style="width: {{ completion_rate }}%;">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- BOTTOM BUTTON -->
+
+    <div class="result-actions">
+
+        <a href="/" class="main-button">
+            Analyze Another Customer →
+        </a>
+
+    </div>
+
+
+    <footer>
+
+        <div>
+            Starbucks Customer Analytics
+        </div>
+
+        <span>
+            Academic Project • Customer Segmentation & Offer Recommendation
+        </span>
+
+    </footer>
+
+</div>
+
+</body>
+
+</html>

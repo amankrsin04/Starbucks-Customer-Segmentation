@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starbucks Customer Intelligence & Campaign Analytics Platform</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Local Chart.js with CDN Fallback -->
+    <script src="{{ url_for('static', filename='js/chart.umd.min.js') }}"></script>
+    <script>
+        if (typeof Chart === 'undefined') {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"><\/script>');
+        }
+    </script>
+
+    <!-- Three.js WebGL Engine (Puture SpaceStage 3D Halo Orbit) -->
+    <script src="{{ url_for('static', filename='js/three.min.js') }}"></script>
+
+    <!-- Application CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<!-- Puture-Style Kinetic Entrance Shell -->
+<div id="putureShell">
+    <div class="shell-hero-wrap">
+        <div class="shell-badge-pill">
+            <span class="pulse-dot"></span>
+            <span>EXPERIENCES, ENGINEERED</span>
+        </div>
+        <div class="shell-kinetic-title" id="shellTitle">
+            <!-- Populated via JS with kinetic character emergence -->
+        </div>
+        <p class="shell-sub">
+            Autonomous customer segmentation, ML offer conversion forecasting, and real-time cohort analytics.
+        </p>
+        <div class="shell-skip-hint">
+            [ PRESS ANY KEY OR CLICK TO ENTER SYSTEM ]
+        </div>
+    </div>
+</div>
+
+<!-- Ambient Canvas 3D SpaceStage (Three.js WebGL) -->
+<canvas id="ambientCanvas"></canvas>
+
+<!-- Custom Magnetic Cursor & Glowing Trailing Ring -->
+<div class="custom-cursor-dot" id="cursorDot"></div>
+<div class="custom-cursor-ring" id="cursorRing"></div>
+
+<div class="app-container">
+
+    <!-- ======================================================================
+         SIDEBAR NAVIGATION
+         ====================================================================== -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="brand-logo-badge">☕</div>
+            <div>
+                <div class="brand-title">STARBUCKS</div>
+                <div class="brand-subtitle">Analytics Platform</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-title">Core Intelligence</div>
+            <a class="nav-item active" data-tab="dashboard">
+                <span class="nav-icon">📊</span> Overview Dashboard
+            </a>
+            <a class="nav-item" data-tab="segmentation">
+                <span class="nav-icon">🎯</span> Customer Segmentation
+            </a>
+            <a class="nav-item" data-tab="pools">
+                <span class="nav-icon">👥</span> Customer Pools & Cohorts
+            </a>
+            <a class="nav-item" data-tab="campaigns">
+                <span class="nav-icon">📈</span> Campaign Performance
+            </a>
+
+            <div class="nav-section-title">AI & Decision Support</div>
+            <a class="nav-item" data-tab="recommender">
+                <span class="nav-icon">✨</span> Offer Recommender
+            </a>
+            <a class="nav-item" data-tab="simulator">
+                <span class="nav-icon">🔮</span> What-If Simulator
+            </a>
+            <a class="nav-item" data-tab="customer360">
+                <span class="nav-icon">👤</span> Customer 360° Profile
+            </a>
+            <a class="nav-item" data-tab="insights">
+                <span class="nav-icon">💡</span> Smart Insights
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="system-status">
+                <span class="pulse-dot"></span>
+                <span>SQLite DB + AI ML Active</span>
+            </div>
+            <a href="/api/export/report/pdf" class="btn-primary" style="width: 100%; justify-content: center; font-size: 12px; padding: 8px 12px; text-decoration: none;" target="_blank">
+                📄 Download Executive PDF
+            </a>
+        </div>
+    </aside>
+
+
+    <!-- ======================================================================
+         MAIN APPLICATION WRAPPER
+         ====================================================================== -->
+    <main class="main-content">
+
+        <!-- STICKY TOP HEADER -->
+        <header class="top-header">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button id="mobileMenuBtn" class="theme-toggle-btn" style="display: none;" title="Toggle Navigation">☰</button>
+                <div class="page-heading">
+                    <h1 id="headerPageTitle">Executive Overview</h1>
+                    <p id="headerPageSubtitle">Real-time performance indicators and revenue concentration</p>
+                </div>
+            </div>
+
+            <!-- Live Tech HUD Status Bar (Puture Studio Aesthetic) -->
+            <div class="hud-metrics-bar">
+                <span class="hud-pill"><span class="hud-indicator blue"></span> LATENCY: <span id="hudLatency" style="color: #38bdf8;">1.8ms</span></span>
+                <span class="hud-pill"><span class="hud-indicator amber"></span> DB: SQLITE ACTIVE</span>
+                <span class="hud-pill"><span class="hud-indicator violet"></span> MODEL: RF-100 AUC 0.90</span>
+            </div>
+
+            <div class="header-actions">
+                <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Dark/Light Mode">☀️</button>
+                <a href="/api/export/report/pdf" class="btn-primary" target="_blank">
+                    <span>Export PDF Brief</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Continuous Infinite Cyber Marquee Ribbon -->
+        <div class="cyber-marquee-ribbon">
+            <div class="marquee-track">
+                <span class="marquee-tag tag-blue">⚡ STARBUCKS INTELLIGENCE V2.0</span>
+                <span class="marquee-tag tag-violet">🔮 K-MEANS CLUSTERING (K=5)</span>
+                <span class="marquee-tag tag-indigo">🌲 RANDOM FOREST ENSEMBLE (AUC 0.90)</span>
+                <span class="marquee-tag tag-amber">👥 14,825 VALIDATED PROFILES</span>
+                <span class="marquee-tag tag-cyan">🛒 272,762 EVENT INTERACTIONS</span>
+                <span class="marquee-tag tag-blue">💾 SQLITE RELATIONAL WAREHOUSE</span>
+                <span class="marquee-tag tag-emerald">📊 REAL-TIME COHORT SIMULATION</span>
+                <span class="marquee-tag tag-rose">🎯 360° BEHAVIORAL GRAPH</span>
+                <!-- Loop repeat for smooth infinite scroll -->
+                <span class="marquee-tag tag-blue">⚡ STARBUCKS INTELLIGENCE V2.0</span>
+                <span class="marquee-tag tag-violet">🔮 K-MEANS CLUSTERING (K=5)</span>
+                <span class="marquee-tag tag-indigo">🌲 RANDOM FOREST ENSEMBLE (AUC 0.90)</span>
+                <span class="marquee-tag tag-amber">👥 14,825 VALIDATED PROFILES</span>
+                <span class="marquee-tag tag-cyan">🛒 272,762 EVENT INTERACTIONS</span>
+                <span class="marquee-tag tag-blue">💾 SQLITE RELATIONAL WAREHOUSE</span>
+                <span class="marquee-tag tag-emerald">📊 REAL-TIME COHORT SIMULATION</span>
+                <span class="marquee-tag tag-rose">🎯 360° BEHAVIORAL GRAPH</span>
+            </div>
+        </div>
+
+        <!-- ==================================================================
+             TAB 1: EXECUTIVE DASHBOARD
+             ================================================================== -->
+        <section class="tab-content active" id="tab-dashboard">
+            <!-- KPI CARDS -->
+            <div class="kpi-grid">
+                <div class="kpi-card tilt-card">
+                    <span class="cyber-corner top-left"></span><span class="cyber-corner top-right"></span>
+                    <span class="cyber-corner bottom-left"></span><span class="cyber-corner bottom-right"></span>
+                    <div class="kpi-header">
+                        <span class="kpi-title">Total Active Members</span>
+                        <span class="kpi-icon">👥</span>
+                    </div>
+                    <div class="kpi-value" id="kpiTotalCustomers">—</div>
+                    <div class="kpi-subtitle">Cleaned member profiles</div>
+                </div>
+
+                <div class="kpi-card tilt-card">
+                    <span class="cyber-corner top-left"></span><span class="cyber-corner top-right"></span>
+                    <span class="cyber-corner bottom-left"></span><span class="cyber-corner bottom-right"></span>
+                    <div class="kpi-header">
+                        <span class="kpi-title">Gross Campaign Revenue</span>
+                        <span class="kpi-icon">💵</span>
+                    </div>
+                    <div class="kpi-value" id="kpiTotalRevenue">—</div>
+                    <div class="kpi-subtitle">Total transaction volume</div>
+                </div>
+
+                <div class="kpi-card tilt-card">
+                    <span class="cyber-corner top-left"></span><span class="cyber-corner top-right"></span>
+                    <span class="cyber-corner bottom-left"></span><span class="cyber-corner bottom-right"></span>
+                    <div class="kpi-header">
+                        <span class="kpi-title">Average Spending</span>
+                        <span class="kpi-icon">💳</span>
+                    </div>
+                    <div class="kpi-value" id="kpiAvgSpend">—</div>
+                    <div class="kpi-subtitle">Per customer lifetime</div>
+                </div>
+
+                <div class="kpi-card tilt-card">
+                    <span class="cyber-corner top-left"></span><span class="cyber-corner top-right"></span>
+                    <span class="cyber-corner bottom-left"></span><span class="cyber-corner bottom-right"></span>
+                    <div class="kpi-header">
+                        <span class="kpi-title">Total Transactions</span>
+                        <span class="kpi-icon">🛒</span>
+                    </div>
+                    <div class="kpi-value" id="kpiTotalTransactions">—</div>
+                    <div class="kpi-subtitle">Store purchasing events</div>
+                </div>
+
+                <div class="kpi-card tilt-card">
+                    <span class="cyber-corner top-left"></span><span class="cyber-corner top-right"></span>
+                    <span class="cyber-corner bottom-left"></span><span class="cyber-corner bottom-right"></span>
+                    <div class="kpi-header">
+                        <span class="kpi-title">Overall View Rate</span>
+                        <span class="kpi-icon">👁️</span>
+                    </div>
+                    <div class="kpi-value" id="kpiOverallViewRate">—</div>
+                    <div class="kpi-subtitle">Offers viewed / received</div>
+                </div>
+
+                <div class="kpi-card tilt-card">
+                    <span class="cyber-corner top-left"></span><span class="cyber-corner top-right"></span>
+                    <span class="cyber-corner bottom-left"></span><span class="cyber-corner bottom-right"></span>
+                    <div class="kpi-header">
+                        <span class="kpi-title">Overall Conversion</span>
+                        <span class="kpi-icon">✓</span>
+                    </div>
+                    <div class="kpi-value" id="kpiOverallCompletionRate">—</div>
+                    <div class="kpi-subtitle">Offers completed / viewed</div>
+                </div>
+            </div>
+
+            <!-- PUTURE-STYLE 3D ISOMETRIC ARCHITECTURE STACK -->
+            <div class="layer-stack-wrapper tilt-card">
+                <span class="cyber-corner top-left"></span><span class="cyber-corner top-right"></span>
+                <span class="cyber-corner bottom-left"></span><span class="cyber-corner bottom-right"></span>
+                <div class="layer-stack-info">
+                    <div class="hud-pill" style="margin-bottom: 12px; display: inline-flex;">
+                        <span class="hud-indicator green"></span> UNIFIED 3-TIER ENGINE
+                    </div>
+                    <h2>System Architecture Stack</h2>
+                    <p>Three decoupled, high-performance computing tiers operating as one continuous analytical loop — from customer interaction to algorithmic optimization.</p>
+                    <div class="layer-legend-list">
+                        <div class="layer-legend-item" onclick="switchTab('recommender')">
+                            <span class="layer-legend-num">03</span>
+                            <div class="layer-legend-text">
+                                <div class="layer-legend-title">Decision & Interaction Tier</div>
+                                <div class="layer-legend-desc">AI Offer Recommender, What-If Simulator & Customer 360° Profiles</div>
+                            </div>
+                            <span style="color: var(--sb-neon-mint); font-size: 13px;">→</span>
+                        </div>
+                        <div class="layer-legend-item" onclick="switchTab('pools')">
+                            <span class="layer-legend-num">02</span>
+                            <div class="layer-legend-text">
+                                <div class="layer-legend-title">Relational Warehouse Tier</div>
+                                <div class="layer-legend-desc">Indexed SQLite Engine, 14,825 Members & Real-Time Cohort Pools</div>
+                            </div>
+                            <span style="color: var(--sb-electric-cyan); font-size: 13px;">→</span>
+                        </div>
+                        <div class="layer-legend-item" onclick="switchTab('segmentation')">
+                            <span class="layer-legend-num">01</span>
+                            <div class="layer-legend-text">
+                                <div class="layer-legend-title">Machine Learning Foundation</div>
+                                <div class="layer-legend-desc">K-Means (k=5), PCA 2D Space & 100-Tree Random Forest (AUC=0.90)</div>
+                            </div>
+                            <span style="color: var(--sb-gold); font-size: 13px;">→</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="layer-stack-scene">
+                    <div class="layer-stack" id="isometricLayerStack">
+                        <div class="layer-slot" style="--layer-idx: 3;" onclick="switchTab('recommender')">
+                            <div class="layer-plane">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span class="layer-label-index">LAYER 03</span>
+                                    <span class="badge" style="background:rgba(0,255,136,0.15); color:#00ff88; font-size:10px; font-weight:800; border-radius:4px; padding:2px 6px;">DECISION</span>
+                                </div>
+                                <div>
+                                    <div class="layer-label-title">Decision Tier</div>
+                                    <div class="layer-label-desc">Recommender & Simulator</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layer-slot" style="--layer-idx: 2;" onclick="switchTab('pools')">
+                            <div class="layer-plane">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span class="layer-label-index">LAYER 02</span>
+                                    <span class="badge" style="background:rgba(0,229,255,0.15); color:#00e5ff; font-size:10px; font-weight:800; border-radius:4px; padding:2px 6px;">SQLITE</span>
+                                </div>
+                                <div>
+                                    <div class="layer-label-title">Warehouse Tier</div>
+                                    <div class="layer-label-desc">14,825 Members & Pools</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layer-slot" style="--layer-idx: 1;" onclick="switchTab('segmentation')">
+                            <div class="layer-plane">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span class="layer-label-index">LAYER 01</span>
+                                    <span class="badge" style="background:rgba(229,185,92,0.15); color:#e5b95c; font-size:10px; font-weight:800; border-radius:4px; padding:2px 6px;">ML CORE</span>
+                                </div>
+                                <div>
+                                    <div class="layer-label-title">Machine Learning</div>
+                                    <div class="layer-label-desc">K-Means & Random Forest</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHARTS ROW -->
+            <div class="charts-grid-2">
+                <div class="chart-card tilt-card">
+                    <span class="cyber-corner top-left"></span><span class="cyber-corner top-right"></span>
+                    <span class="cyber-corner bottom-left"></span><span class="cyber-corner bottom-right"></span>
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Revenue Share by Customer Segment</div>
+                            <div class="chart-subtitle">Gross spending concentration across the 5 behavioral clusters</div>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chartRevenueDoughnut"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card tilt-card">
+                    <span class="cyber-corner top-left"></span><span class="cyber-corner top-right"></span>
+                    <span class="cyber-corner bottom-left"></span><span class="cyber-corner bottom-right"></span>
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Promotional Funnel Drop-off</div>
+                            <div class="chart-subtitle">Aggregate customer journey from receipt to offer completion</div>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chartPromotionalFunnel"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==================================================================
+             TAB 2: CUSTOMER SEGMENTATION & K-MEANS CLUSTERS
+             ================================================================== -->
+        <section class="tab-content" id="tab-segmentation">
+            <!-- SEGMENT CARDS GRID -->
+            <div class="segment-cards-grid" id="segmentCardsContainer">
+                <!-- Injected via JavaScript -->
+            </div>
+
+            <!-- SELECTED SEGMENT STRATEGY INSPECTOR -->
+            <div class="kpi-card" style="margin-bottom: 24px; border-left: 4px solid var(--sb-green);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h3 id="inspectorSegmentTitle" style="font-size: 16px; font-weight: 700; color: var(--sb-text-main);">
+                        Segment Strategy Inspector
+                    </h3>
+                    <button class="btn-secondary" id="exportCsvBtn" style="font-size: 12px; padding: 6px 12px;">
+                        📥 Export Segment CSV
+                    </button>
+                </div>
+                <p id="inspectorStrategyText" style="font-size: 13px; color: var(--sb-text-muted); line-height: 1.6;">
+                    Select a segment card above to inspect its marketing strategy and member table.
+                </p>
+            </div>
+
+            <!-- SEGMENT CHARTS -->
+            <div class="charts-grid-2">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">PCA 2D Cluster Space (Dimensionality Reduction)</div>
+                            <div class="chart-subtitle">Projection of multi-dimensional scaled behavior (1,200 sample points)</div>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chartPcaScatter"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Cluster Comparison Radar</div>
+                            <div class="chart-subtitle">Relative behavioral intensity across 5 standardized metrics</div>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chartSegmentRadar"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ELBOW & SILHOUETTE VALIDATION -->
+            <div class="chart-card" style="margin-bottom: 24px;">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">K-Means Model Justification: Elbow Method & Silhouette Scores</div>
+                        <div class="chart-subtitle">Cluster optimization curve validating k=5 as the optimal statistical balance</div>
+                    </div>
+                </div>
+                <div class="chart-body" style="height: 280px;">
+                    <canvas id="chartElbowCurve"></canvas>
+                </div>
+            </div>
+
+            <!-- CUSTOMERS TABLE -->
+            <div class="table-container">
+                <div class="table-toolbar">
+                    <div class="search-input-wrapper">
+                        <span>🔍</span>
+                        <input type="text" id="customerTableSearch" placeholder="Filter by Customer ID prefix...">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label style="font-size: 12px; color: var(--sb-text-muted);">Sort by:</label>
+                        <select id="customerTableSort" class="form-control" style="width: auto; padding: 6px 12px; font-size: 12px;">
+                            <option value="money_spent">Total Spend (High to Low)</option>
+                            <option value="num_transactions">Transactions (High to Low)</option>
+                            <option value="completion_rate">Completion Rate</option>
+                            <option value="income">Income</option>
+                            <option value="age">Age</option>
+                        </select>
+                    </div>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Customer ID</th>
+                            <th>Demographics</th>
+                            <th>Income</th>
+                            <th>Total Spend</th>
+                            <th>Visits</th>
+                            <th>Completion %</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customerTableBody">
+                        <!-- Injected via JavaScript -->
+                    </tbody>
+                </table>
+
+                <div class="pagination-footer" id="customerTablePagination">
+                    <!-- Pagination controls -->
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==================================================================
+             TAB 3: CUSTOMER POOLS & COHORT EXPLORER
+             ================================================================== -->
+        <section class="tab-content" id="tab-pools">
+            <div style="margin-bottom: 20px;">
+                <h2 style="font-size: 18px; font-weight: 800; color: var(--sb-text-main);">Actionable Customer Cohort Pools</h2>
+                <p style="font-size: 12.5px; color: var(--sb-text-muted);">Targeted customer pools grouped by behavioral readiness, value tier, and engagement health.</p>
+            </div>
+
+            <!-- POOLS GRID -->
+            <div class="pools-grid" id="customerPoolsGrid">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- POOLS VALUE SHARE CHART -->
+            <div class="chart-card" style="margin-bottom: 24px;">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Customer Pool Revenue vs Membership Share</div>
+                        <div class="chart-subtitle">Direct comparison between pool member size and generated gross spend</div>
+                    </div>
+                </div>
+                <div class="chart-body" style="height: 280px;">
+                    <canvas id="chartPoolsComparison"></canvas>
+                </div>
+            </div>
+
+            <!-- DEMOGRAPHIC DISTRIBUTIONS -->
+            <div class="charts-grid-equal">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Customer Age Bracket Distribution</div>
+                            <div class="chart-subtitle">Member representation across generational age groups</div>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chartAgeDistribution"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Customer Income Tier Distribution</div>
+                            <div class="chart-subtitle">Member volume across annual income tiers ($30k - $120k)</div>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chartIncomeDistribution"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CORRELATION HEATMAP TABLE -->
+            <div class="table-container" style="margin-top: 24px;">
+                <div class="table-toolbar">
+                    <div>
+                        <div class="chart-title">Statistical Feature Correlation Matrix</div>
+                        <div class="chart-subtitle">Pearson correlation coefficients between spending, visits, and demographics</div>
+                    </div>
+                </div>
+                <table class="data-table" id="correlationTable">
+                    <!-- Injected via JS -->
+                </table>
+            </div>
+        </section>
+
+
+        <!-- ==================================================================
+             TAB 4: CAMPAIGN PERFORMANCE ANALYTICS
+             ================================================================== -->
+        <section class="tab-content" id="tab-campaigns">
+            <!-- 10 OFFERS GRID -->
+            <div style="margin-bottom: 16px;">
+                <h2 style="font-size: 18px; font-weight: 800; color: var(--sb-text-main);">Promotional Offer Portfolio</h2>
+                <p style="font-size: 12.5px; color: var(--sb-text-muted);">Live conversion metrics across the 10 official Starbucks promotional campaigns.</p>
+            </div>
+            <div class="kpi-grid" id="campaignOffersGrid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- CAMPAIGN CHARTS -->
+            <div class="charts-grid-equal" style="margin-top: 24px;">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Conversion Rate by Offer Type</div>
+                            <div class="chart-subtitle">Discount vs BOGO vs Informational view and completion rates</div>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chartCampaignByType"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Segment Responsiveness to Promotions</div>
+                            <div class="chart-subtitle">Discount vs BOGO completion percentages across each customer segment</div>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chartSegmentMatrix"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==================================================================
+             TAB 5: AI PERSONALIZED OFFER RECOMMENDER
+             ================================================================== -->
+        <section class="tab-content" id="tab-recommender">
+            <!-- QUICK SAMPLE CUSTOMER BUTTONS -->
+            <div class="kpi-card" style="margin-bottom: 20px; padding: 16px 20px; background: var(--sb-card-bg);">
+                <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--sb-text-muted); margin-bottom: 8px;">
+                    ⚡ 1-Click Load Real Customer Profiles from Dataset:
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="quickSampleCustomerPills">
+                    <button type="button" class="btn-secondary" onclick="loadSampleCustomer(2)" style="font-size: 12px; padding: 6px 12px; border-color: var(--sb-green); color: var(--sb-green); font-weight: 700;">
+                        🟢 Load VIP Spender ($1,327 Spend)
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="loadSampleCustomer(1)" style="font-size: 12px; padding: 6px 12px; border-color: #1f6feb; color: #1f6feb; font-weight: 700;">
+                        🔵 Load Daily Loyalist (12 Visits)
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="loadSampleCustomer(3)" style="font-size: 12px; padding: 6px 12px; border-color: #238636; color: #238636; font-weight: 700;">
+                        🌿 Load Affluent Seeker ($106k Inc)
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="loadSampleCustomer(4)" style="font-size: 12px; padding: 6px 12px; border-color: #d29922; color: #d29922; font-weight: 700;">
+                        🟡 Load Occasional Member ($497 Spend)
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="loadSampleCustomer(0)" style="font-size: 12px; padding: 6px 12px; border-color: #cf222e; color: #cf222e; font-weight: 700;">
+                        🔴 Load At-Risk Customer ($170 Spend)
+                    </button>
+                </div>
+            </div>
+
+            <div class="simulator-panel">
+                <!-- FORM -->
+                <div>
+                    <div style="margin-bottom: 16px;">
+                        <h2 style="font-size: 18px; font-weight: 800; color: var(--sb-text-main);">Personalized Offer Matcher</h2>
+                        <p style="font-size: 12.5px; color: var(--sb-text-muted);">Loaded with real customer behavior from dataset. Modify attributes or click any quick-load button above.</p>
+                    </div>
+
+                    <!-- Autocomplete lookup -->
+                    <div class="form-group">
+                        <label>Lookup Customer by ID</label>
+                        <input type="text" id="existingCustomerSearch" list="customerSuggestionsList" class="form-control" placeholder="Type 3+ letters to search (e.g. 78afa9...)">
+                        <datalist id="customerSuggestionsList"></datalist>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid var(--sb-border); margin: 16px 0;">
+
+                    <form id="recommenderForm">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                            <div class="form-group">
+                                <label>Age</label>
+                                <input type="number" id="recAge" class="form-control" value="36" min="18" max="100" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Annual Income ($)</label>
+                                <input type="number" id="recIncome" class="form-control" value="71000" min="10000" step="1000" required>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                            <div class="form-group">
+                                <label>Gender</label>
+                                <select id="recGender" class="form-control">
+                                    <option value="F" selected>Female</option>
+                                    <option value="M">Male</option>
+                                    <option value="O">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Store Transactions</label>
+                                <input type="number" id="recTransactions" class="form-control" value="16" min="0" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Total Money Spent ($)</label>
+                            <input type="number" id="recMoneySpent" class="form-control" value="1327.74" min="0" step="0.5" required>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                            <div class="form-group">
+                                <label>Received</label>
+                                <input type="number" id="recReceived" class="form-control" value="5" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Viewed</label>
+                                <input type="number" id="recViewed" class="form-control" value="3" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Completed</label>
+                                <input type="number" id="recCompleted" class="form-control" value="3" min="0" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
+                            ⚡ Run AI Recommendation Model
+                        </button>
+                    </form>
+                </div>
+
+                <!-- EXPLANATION & METHODOLOGY INFO -->
+                <div style="background: var(--sb-hover-bg); border-radius: var(--radius-md); padding: 22px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <h3 style="font-size: 15px; font-weight: 700; color: var(--sb-text-main); margin-bottom: 8px;">Recommendation Methodology</h3>
+                        <p style="font-size: 12px; color: var(--sb-text-muted); line-height: 1.6; margin-bottom: 14px;">
+                            Our recommendation pipeline employs a two-tier evaluation engine:
+                        </p>
+                        <div style="font-size: 12px; color: var(--sb-text-main); line-height: 1.6; margin-bottom: 10px;">
+                            <strong>1. K-Means Behavioral Classification:</strong> Standardizes customer demographics and purchasing frequency to assign them to one of 5 empirical segments.
+                        </div>
+                        <div style="font-size: 12px; color: var(--sb-text-main); line-height: 1.6; margin-bottom: 10px;">
+                            <strong>2. Supervised Conversion Forecast:</strong> A trained Random Forest Classifier predicts completion probability for every available offer, preventing feature leakage and weighting affordability.
+                        </div>
+                    </div>
+                    <div style="background: var(--sb-card-bg); padding: 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--sb-green); font-size: 11.5px; color: var(--sb-text-muted);">
+                        ✓ Validated with Stratified 80/20 Test Separation (ROC-AUC: 0.9027, Accuracy: 83.68%).
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECOMMENDATION RESULTS CONTAINER -->
+            <div id="recommendationOutputSection" style="margin-top: 28px;">
+                <div class="kpi-card" style="border-left: 4px solid var(--sb-green); margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span class="segment-badge" id="recResultSegmentBadge" style="background: var(--sb-light-green); color: var(--sb-dark-green);">
+                            VIP TIER
+                        </span>
+                        <span style="font-size: 12px; color: var(--sb-text-muted);">Assigned Segment</span>
+                    </div>
+                    <h2 id="recResultSegmentName" style="font-size: 20px; font-weight: 800; color: var(--sb-text-main); margin-bottom: 6px;">
+                        High-Value VIP Spenders
+                    </h2>
+                    <p id="recResultSegmentDesc" style="font-size: 12.5px; color: var(--sb-text-muted); margin-bottom: 8px;">—</p>
+                    <div id="recResultStrategy" style="font-size: 12px; font-weight: 600; color: var(--sb-green);">—</div>
+                </div>
+
+                <h3 style="font-size: 16px; font-weight: 700; color: var(--sb-text-main); margin-bottom: 14px;">
+                    Top 3 Ranked Promotional Recommendations
+                </h3>
+                <div class="offer-rec-grid" id="recommendedOffersCardsGrid">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==================================================================
+             TAB 6: WHAT-IF MARKETING SIMULATOR
+             ================================================================== -->
+        <section class="tab-content" id="tab-simulator">
+            <div class="simulator-panel">
+                <!-- SIMULATOR CONTROLS -->
+                <div>
+                    <div style="margin-bottom: 20px;">
+                        <h2 style="font-size: 18px; font-weight: 800; color: var(--sb-text-main);">Interactive Campaign Simulator</h2>
+                        <p style="font-size: 12.5px; color: var(--sb-text-muted);">Model campaign outcomes, audience reach, costs, and projected ROI prior to launch.</p>
+                    </div>
+
+                    <form id="simulatorForm">
+                        <div class="form-group">
+                            <label>Target Customer Segment Pool</label>
+                            <select id="simSegmentSelect" class="form-control">
+                                <option value="0">Cluster 0: Low-Engagement / At-Risk Pool</option>
+                                <option value="1">Cluster 1: Frequent Everyday Loyalists</option>
+                                <option value="2">Cluster 2: High-Value VIP Spenders</option>
+                                <option value="3" selected>Cluster 3: Affluent Offer Enthusiasts</option>
+                                <option value="4">Cluster 4: Selective Occasionals</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Offer Type</label>
+                            <select id="simOfferType" class="form-control">
+                                <option value="discount" selected>Discount Challenge</option>
+                                <option value="bogo">BOGO (Buy One Get One)</option>
+                                <option value="informational">Informational Awareness</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Reward Incentive ($)</label>
+                            <div class="range-slider-wrapper">
+                                <input type="range" id="simRewardSlider" min="0" max="10" step="1" value="3">
+                                <span class="slider-val-badge" id="simRewardVal">$3</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Spend Difficulty Threshold ($)</label>
+                            <div class="range-slider-wrapper">
+                                <input type="range" id="simDifficultySlider" min="0" max="20" step="1" value="7">
+                                <span class="slider-val-badge" id="simDifficultyVal">$7</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Duration (Days)</label>
+                            <div class="range-slider-wrapper">
+                                <input type="range" id="simDurationSlider" min="3" max="10" step="1" value="7">
+                                <span class="slider-val-badge" id="simDurationVal">7d</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Target Audience Reach (Members)</label>
+                            <div class="range-slider-wrapper">
+                                <input type="range" id="simAudienceSlider" min="100" max="4000" step="100" value="2000">
+                                <span class="slider-val-badge" id="simAudienceVal">2,000</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Allocated Budget ($)</label>
+                            <input type="number" id="simBudgetInput" class="form-control" value="6000" min="500" step="500">
+                        </div>
+
+                        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 11px;">
+                            Recalculate Projections
+                        </button>
+                    </form>
+                </div>
+
+                <!-- SIMULATION RESULTS & CHART -->
+                <div class="sim-results-card">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span class="badge" style="background: var(--sb-light-green); color: var(--sb-dark-green); font-weight: 700; padding: 3px 8px; border-radius: 4px;">
+                                SIMULATED PROJECTION
+                            </span>
+                            <span id="simBudgetStatus" style="font-size: 11.5px; font-weight: 700; color: var(--sb-green);">
+                                Adequate Budget
+                            </span>
+                        </div>
+
+                        <div class="sim-metrics-grid">
+                            <div class="sim-metric-box">
+                                <div class="sim-metric-val" id="simResultViews">—</div>
+                                <div class="sim-metric-lbl">Projected Views</div>
+                            </div>
+                            <div class="sim-metric-box">
+                                <div class="sim-metric-val" id="simResultCompletions">—</div>
+                                <div class="sim-metric-lbl">Projected Completions</div>
+                            </div>
+                            <div class="sim-metric-box">
+                                <div class="sim-metric-val" id="simResultCost">—</div>
+                                <div class="sim-metric-lbl">Estimated Cost</div>
+                            </div>
+                            <div class="sim-metric-box">
+                                <div class="sim-metric-val" id="simResultRevenue">—</div>
+                                <div class="sim-metric-lbl">Gross Revenue</div>
+                            </div>
+                        </div>
+
+                        <div style="background: var(--sb-card-bg); border: 1px solid var(--sb-border); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 14px; text-align: center;">
+                            <div style="font-size: 11px; text-transform: uppercase; color: var(--sb-text-muted);">Estimated Net Profit</div>
+                            <div id="simResultProfit" style="font-size: 24px; font-weight: 800; color: var(--sb-green); margin: 2px 0;">—</div>
+                            <div style="font-size: 12px; color: var(--sb-text-muted);">Projected Return on Investment: <strong id="simResultRoi" style="color: var(--sb-green);">—</strong></div>
+                        </div>
+
+                        <!-- SIMULATION FINANCIAL COMPARISON CHART -->
+                        <div style="height: 180px; position: relative;">
+                            <canvas id="chartSimulationFinancials"></canvas>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 11px; color: var(--sb-text-muted); line-height: 1.5; border-top: 1px solid var(--sb-border); padding-top: 10px; margin-top: 10px;">
+                        ⚠️ <strong>Methodology Note:</strong> Outcomes are modeled via historical segment response baselines and Random Forest classification.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==================================================================
+             TAB 7: CUSTOMER 360° PROFILE & COMPARATOR
+             ================================================================== -->
+        <section class="tab-content" id="tab-customer360">
+            <!-- QUICK CUSTOMER SWITCHER PILLS -->
+            <div class="kpi-card" style="margin-bottom: 20px; padding: 14px 20px;">
+                <div style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--sb-text-muted); margin-bottom: 8px;">
+                    ⚡ Quick Inspect Real Customers Across Segments:
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="page-btn" onclick="inspectCustomerDirectly('ae6f43089b674728a50b8727252d3305')" style="border-color: var(--sb-green); color: var(--sb-green); font-weight: 600;">
+                        VIP Member (ae6f43...)
+                    </button>
+                    <button class="page-btn" onclick="inspectCustomerDirectly('8efe784d3d864d1294e5d6c71af22032')" style="border-color: #1f6feb; color: #1f6feb; font-weight: 600;">
+                        Daily Loyalist (8efe78...)
+                    </button>
+                    <button class="page-btn" onclick="inspectCustomerDirectly('b77a7ad3e61243908235f4427c79bf34')" style="border-color: #238636; color: #238636; font-weight: 600;">
+                        Affluent Member (b77a7a...)
+                    </button>
+                    <button class="page-btn" onclick="inspectCustomerDirectly('9250d51a392f4f2691eabff6851dcf66')" style="border-color: #d29922; color: #d29922; font-weight: 600;">
+                        Occasional (9250d5...)
+                    </button>
+                    <button class="page-btn" onclick="inspectCustomerDirectly('e08c38ea6ccb4f668dbc3ae92731203d')" style="border-color: #cf222e; color: #cf222e; font-weight: 600;">
+                        At-Risk Member (e08c38...)
+                    </button>
+                </div>
+            </div>
+
+            <!-- SEARCH TOOLBAR -->
+            <div class="table-container" style="padding: 18px 24px; margin-bottom: 24px;">
+                <form id="customer360SearchForm" style="display: flex; gap: 12px; align-items: center; max-width: 650px;">
+                    <div class="search-input-wrapper" style="flex: 1;">
+                        <span>👤</span>
+                        <input type="text" id="customer360SearchInput" value="ae6f43089b674728a50b8727252d3305" placeholder="Enter Customer ID..." required>
+                    </div>
+                    <button type="submit" class="btn-primary">Search Member</button>
+                </form>
+            </div>
+
+            <!-- PROFILE HERO CARD -->
+            <div id="c360ProfileCard">
+                <div class="customer-360-header">
+                    <div class="customer-avatar-box">
+                        <div class="avatar-circle">☕</div>
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <h2 id="c360CustomerId" style="font-size: 18px; font-weight: 800; font-family: monospace;">—</h2>
+                                <span class="segment-badge" id="c360SegmentBadge" style="background: var(--sb-light-green); color: var(--sb-dark-green);">
+                                    VIP
+                                </span>
+                            </div>
+                            <div id="c360Demographics" style="font-size: 12.5px; color: var(--sb-text-muted); margin-top: 4px;">—</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px;">
+                        <div>
+                            <div style="font-size: 18px; font-weight: 800; color: var(--sb-text-main);" id="c360TotalSpend">—</div>
+                            <div style="font-size: 10px; color: var(--sb-text-muted); text-transform: uppercase;">Lifetime Spend</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 18px; font-weight: 800; color: var(--sb-text-main);" id="c360Transactions">—</div>
+                            <div style="font-size: 10px; color: var(--sb-text-muted); text-transform: uppercase;">Visits</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 18px; font-weight: 800; color: var(--sb-text-main);" id="c360Income">—</div>
+                            <div style="font-size: 10px; color: var(--sb-text-muted); text-transform: uppercase;">Income</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 18px; font-weight: 800; color: var(--sb-green);" id="c360CompletionRate">—</div>
+                            <div style="font-size: 10px; color: var(--sb-text-muted); text-transform: uppercase;">Completion %</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TIMELINE CHART & JOURNEY -->
+                <div class="charts-grid-2">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">Historical Spending Progression</div>
+                                <div class="chart-subtitle">Transaction distribution across the 714-hour monitoring period</div>
+                            </div>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chartCustomerTimeline"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">Offer Response Log & Journey</div>
+                                <div class="chart-subtitle">Audited interaction timestamps for all received campaigns</div>
+                            </div>
+                        </div>
+                        <div class="journey-timeline" id="c360OfferJourney" style="max-height: 320px; overflow-y: auto;">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CUSTOMER COMPARATOR TOOL -->
+            <div class="table-container" style="padding: 24px; margin-top: 24px;">
+                <div style="margin-bottom: 16px;">
+                    <h3 style="font-size: 16px; font-weight: 800; color: var(--sb-text-main);">Customer Comparison Tool</h3>
+                    <p style="font-size: 12px; color: var(--sb-text-muted);">Compare two individual customers side-by-side using real dataset records.</p>
+                </div>
+
+                <form id="customerCompareForm" style="display: flex; gap: 14px; flex-wrap: wrap;">
+                    <input type="text" id="compareId1" class="form-control" value="ae6f43089b674728a50b8727252d3305" placeholder="Customer ID 1..." style="flex: 1; min-width: 200px;" required>
+                    <input type="text" id="compareId2" class="form-control" value="8efe784d3d864d1294e5d6c71af22032" placeholder="Customer ID 2..." style="flex: 1; min-width: 200px;" required>
+                    <button type="submit" class="btn-primary">Compare Customers</button>
+                </form>
+
+                <div id="comparisonResultsGrid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==================================================================
+             TAB 8: SMART MARKETING INSIGHTS
+             ================================================================== -->
+        <section class="tab-content" id="tab-insights">
+            <div style="margin-bottom: 20px;">
+                <h2 style="font-size: 18px; font-weight: 800; color: var(--sb-text-main);">Data-Driven Strategic Directives</h2>
+                <p style="font-size: 12.5px; color: var(--sb-text-muted);">Algorithmic findings synthesized directly from customer spending elasticity, response funnels, and channel synergy.</p>
+            </div>
+
+            <div class="insights-grid" id="insightsCardsContainer">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+    </main>
+
+</div>
+
+<!-- Application JS -->
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
